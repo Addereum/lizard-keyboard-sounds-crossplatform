@@ -60,6 +60,7 @@ namespace LizardCrossPlatform
         private void OnExitClick(object? sender, EventArgs e)
         {
             _hookManager?.Dispose();
+            _audioEngine?.Dispose();
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
                 desktop.Shutdown();

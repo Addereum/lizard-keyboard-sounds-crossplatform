@@ -1,15 +1,16 @@
 # 🦎 Lizard Keyboard Sounds (Cross-Platform)
 
-Die ultimative Mechanical Keyboard Sound App für **Windows** und **Linux**. Geschrieben in C# mit Avalonia UI.
+Die ultimative Mechanical Keyboard Sound App für **Windows** und **Linux**. Geschrieben in C# mit Avalonia UI. 
+Diese Version unterstützt **echte Polyphonie** (überlappende Sounds) durch die BASS Audio-Engine.
 
 ![Lizard Logo](icon.png)
 
 ## ✨ Features
-- **Cross-Platform**: Läuft nativ auf Windows und Ubuntu/Linux.
-- **System Tray**: Läuft dezent im Hintergrund.
+- **System Tray App**: Läuft dezent im Hintergrund neben der Uhr.
+- **Echte Polyphonie**: Dank ManagedBass überlappen sich die Töne ohne Verzögerung.
+- **Globaler Hook**: Reagiert auf Tasteneingaben in jeder Anwendung (X11 unter Linux).
 - **GUI Settings**: Grafische Lautstärkeregelung direkt in der App.
-- **SharpHook**: Hochperformantes, globales Abfangen von Tastenanschlägen.
-- **Persistent**: Speichert deine Einstellungen automatisch in `settings.json`.
+- **Persistenz**: Speichert deine bevorzugte Lautstärke automatisch.
 
 ---
 
@@ -17,15 +18,22 @@ Die ultimative Mechanical Keyboard Sound App für **Windows** und **Linux**. Ges
 
 ### 1. Voraussetzungen
 - [.NET 8 SDK](https://dotnet.microsoft.com/download)
-- **Linux Nutzer**: Ein X11-basiertes Desktop-Environment (siehe Troubleshooting).
+- **Linux Nutzer**: Ein X11-basiertes Desktop-Environment (z.B. "Ubuntu on Xorg" beim Login auswählen).
 
-### 2. Sound-Datei hinzufügen
-Die App benötigt eine Datei namens `sound.mp3`.
+### 2. Audio-Engine (WICHTIG!)
+Die App nutzt **ManagedBass**. Du musst die nativen Treiber einmalig herunterladen und in den Projektordner legen:
+1. Gehe zu **[un4seen.com](http://www.un4seen.com/bass.html)**.
+2. Lade das Windows-Paket und/oder Linux-Paket herunter.
+3. Kopiere die **x64 Version** der Library in diesen Ordner (`lizard_crossplatform`):
+   - **Windows**: `bass.dll`
+   - **Linux**: `libbass.so`
+
+### 3. Sound-Datei hinzufügen
 - Erstelle einen Ordner `assets` im Projektverzeichnis.
 - Speichere deinen Sound als **`sound.mp3`** darin ab.
 - **Empfehlung**: [Lizzard Effect auf MyInstants](https://www.myinstants.com/de/instant/lizzard-1-94606/)
 
-### 3. Starten
+### 4. Starten
 ```bash
 cd lizard_crossplatform
 dotnet run
@@ -44,27 +52,17 @@ dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=
 ```bash
 dotnet publish -c Release -r linux-x64 --self-contained true -p:PublishSingleFile=true
 ```
-Die fertige Datei findest du dann unter `bin/Release/net8.0/linux-x64/publish/`.
+Die native `bass.dll` / `libbass.so` muss sich im selben Ordner wie die fertige `.exe` befinden.
 
 ---
 
 ## 🛠️ Troubleshooting
 
-### 🔇 Kein Ton unter Linux?
-Die Audio-Engine (`NetCoreAudio`) nutzt System-Player. Falls kein Ton kommt, installiere einen MP3-Player:
-```bash
-sudo apt update
-sudo apt install mpg123
-```
-Alternativ wird auch `aplay` oder `mplayer` unterstützt.
+### 🔇 Startet nicht / Audio-Fehler?
+Stelle sicher, dass die `bass.dll` (Windows) oder `libbass.so` (Linux) im Projektordner liegt. Ohne diese Dateien kann die App den Audio-Mixer nicht initialisieren.
 
 ### ⌨️ Tasten werden nicht erkannt (Linux)?
-Unter Linux gibt es zwei große Grafik-Systeme: **Wayland** und **X11 (Xorg)**.
-- **Problem**: Wayland verbietet aus Sicherheitsgründen das Abfangen globaler Tastenanschläge.
-- **Lösung**: Melde dich beim Ubuntu-Login ab. Klicke auf das Zahnrad unten rechts und wähle **"Ubuntu on Xorg"** aus. Damit funktionieren Hooks wieder einwandfrei.
-
-### 🛡️ Antivirus-Warnung (Windows)
-Da die App Tastenanschläge abfängt (Hooks), stufen manche Virenscanner sie als "Keylogger" ein. Das ist bei dieser Art von Software technisch bedingt normal. Du kannst den Ordner als Ausnahme hinzufügen.
+Melde dich beim Ubuntu-Login ab. Klicke auf das Zahnrad unten rechts und wähle **"Ubuntu on Xorg"** aus. Unter Wayland sind globale Hooks standardmäßig gesperrt.
 
 ---
-*Viel Spaß beim Tippen! 🦎*
+*Viel Spaß beim "lizard" tippen! 🦎🎶*

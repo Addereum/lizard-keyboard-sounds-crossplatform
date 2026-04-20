@@ -1,35 +1,68 @@
 using System;
 using System.IO;
-using System.Threading.Tasks;
-using NetCoreAudio;
+using ManagedBass;
 
 namespace LizardCrossPlatform
 {
-    public class AudioEngine
+    public class AudioEngine : IDisposable
     {
-        private Player _player;
+        private int _sampleHandle;
         private string _soundPath;
-        public float Volume { get; set; } = 1.0f;
+        private float _volume = 1.0f;
+
+        public float Volume 
+        { 
+            get => _volume; 
+            set 
+            { 
+                _volume = value;
+                // BASS volume is channel-based or global. 
+                // We apply it per channel in Play().
+            } 
+        }
 
         public AudioEngine(string soundPath)
         {
-            _player = new Player();
             _soundPath = soundPath;
+            
+            // Initialize BASS (default device, 44100Hz)
+            if (!Bass.Init())
+            {
+                // If already initialized or failed
+            }
+
+            LoadSample();
+        }
+
+        private void LoadSample()
+        {
+            if (File.Exists(_soundPath))
+            {
+                // Load into memory for rapid fire playback (polyphony)
+                _sampleHandle = Bass.SampleLoad(_soundPath, 0, 0, 16, BassFlags.Default);
+            }
         }
 
         public void Play()
         {
-            if (!File.Exists(_soundPath)) return;
+            if (_sampleHandle == 0) return;
 
-            // In a real high-perf app, we'd use a mixer.
-            // NetCoreAudio might have latency depending on the system player.
-            Task.Run(async () => {
-                try {
-                    // NetCoreAudio volume is 0-100
-                    await _player.SetVolume((byte)(Volume * 100));
-                    await _player.Play(_soundPath);
-                } catch { }
-            });
+            // Get a channel from the sample to play it polyphonically
+            int channel = Bass.SampleGetChannel(_sampleHandle);
+            if (channel != 0)
+            {
+                Bass.ChannelSetAttribute(channel, ChannelAttribute.Volume, _volume);
+                Bass.ChannelPlay(channel);
+            }
+        }
+
+        public void Dispose()
+        {
+            if (_sampleHandle != 0)
+            {
+                Bass.SampleFree(_sampleHandle);
+            }
+            Bass.Free();
         }
     }
 }

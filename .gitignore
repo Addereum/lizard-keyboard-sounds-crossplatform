@@ -3,6 +3,7 @@ bin/
 obj/
 *.exe
 *.dll
+*.so
 *.pdb
 
 # Avalonia
