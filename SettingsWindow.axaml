@@ -1,0 +1,30 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="LizardCrossPlatform.SettingsWindow"
+        Title="Lizard Settings"
+        Width="350" Height="200"
+        CanResize="False"
+        WindowStartupLocation="CenterScreen"
+        Background="#1e1e1e"
+        Foreground="White">
+    <StackPanel Margin="30" VerticalAlignment="Center">
+        <TextBlock Name="VolumeLabel" 
+                   Text="Volume: 100%" 
+                   FontSize="16" 
+                   FontWeight="Bold" 
+                   Margin="0,0,0,10"
+                   HorizontalAlignment="Center"/>
+        
+        <Slider Name="VolumeSlider" 
+                Minimum="0" Maximum="100" 
+                Value="100" 
+                Margin="0,0,0,20"/>
+        
+        <Button Name="CloseButton" 
+                Content="Save &amp; Close" 
+                HorizontalAlignment="Center"
+                Padding="20,8"
+                Background="#2d2d30"
+                Foreground="White"/>
+    </StackPanel>
+</Window>

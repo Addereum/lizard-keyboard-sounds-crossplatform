@@ -1,0 +1,29 @@
+# .NET
+bin/
+obj/
+*.exe
+*.dll
+*.pdb
+
+# Avalonia
+.avalonia/
+
+# User Settings
+settings.json
+
+# Audio (No copyrighted sound on GitHub)
+assets/*.mp3
+assets/*.wav
+
+# Visual Studio / Rider / VS Code
+.vs/
+.vscode/
+.idea/
+*.user
+*.userosscache
+*.sln.docstates
+*.suo
+
+# Local history
+.ionide/
+.history/
