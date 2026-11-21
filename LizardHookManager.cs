@@ -1,7 +1,7 @@
 using System;
 using System.Threading;
 using SharpHook;
-using SharpHook.Native;
+using SharpHook.Data;
 
 namespace LizardCrossPlatform;
 

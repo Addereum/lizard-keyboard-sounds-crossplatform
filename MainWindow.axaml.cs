@@ -4,7 +4,7 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Platform.Storage;
-using SharpHook.Native;
+using SharpHook.Data;
 using System;
 using System.Collections.Generic;
 using System.IO;

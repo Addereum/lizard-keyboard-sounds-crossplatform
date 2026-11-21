@@ -4,7 +4,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
 using System.Collections.Generic;
-using SharpHook.Native;
+using SharpHook.Data;
 using System;
 using System.IO;
 using System.Text.Json;

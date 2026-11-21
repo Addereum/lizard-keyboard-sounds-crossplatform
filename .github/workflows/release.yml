@@ -74,3 +74,5 @@ jobs:
         with:
           files: release-assets/*.zip
           generate_release_notes: true
+          prerelease: ${{ contains(github.ref_name, '-alpha.') }}
+          make_latest: ${{ !contains(github.ref_name, '-alpha.') }}
