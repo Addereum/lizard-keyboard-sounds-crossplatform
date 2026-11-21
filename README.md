@@ -1,68 +1,46 @@
-# 🦎 Lizard Keyboard Sounds (Cross-Platform)
+# Lizard Keyboard Sounds
 
-Die ultimative Mechanical Keyboard Sound App für **Windows** und **Linux**. Geschrieben in C# mit Avalonia UI. 
-Diese Version unterstützt **echte Polyphonie** (überlappende Sounds) durch die BASS Audio-Engine.
+Eine Desktop-App für Windows und Linux, die Tastendrücke systemweit mit Sounds belegt. Die Oberfläche basiert auf Avalonia, die globale Tastenerkennung auf SharpHook und die Audio-Wiedergabe auf ManagedBass.
 
-![Lizard Logo](icon.png)
+## Funktionen
 
-## ✨ Features
-- **System Tray App**: Läuft dezent im Hintergrund neben der Uhr.
-- **Echte Polyphonie**: Dank ManagedBass überlappen sich die Töne ohne Verzögerung.
-- **Globaler Hook**: Reagiert auf Tasteneingaben in jeder Anwendung (X11 unter Linux).
-- **GUI Settings**: Grafische Lautstärkeregelung direkt in der App.
-- **Persistenz**: Speichert deine bevorzugte Lautstärke automatisch.
+- Einen Standardsound für alle Tasten festlegen
+- Für einzelne Tasten eigene Sounds aufnehmen und zuordnen
+- Einzelne Tasten stummschalten, zum Beispiel linke oder rechte Umschalttaste
+- Optional beim Gedrückthalten nur einmal pro Tastendruck abspielen
+- Mechvibes-Soundpacks als ZIP importieren; Tastensegmente werden in lokale WAV-Dateien umgewandelt
+- Eine komplette Tastatur anklicken: Deutsch QWERTZ oder Englisch QWERTY, inklusive Funktionstasten, Navigation und Nummernfeld
+- Die App-Sprache zwischen Deutsch und Englisch umschalten
+- Sounds direkt in der App anhören
+- Zwei enthaltene, eigens synthetisierte Presets: „Thock“ und „Creamy“, jeweils als Standard oder pro Taste auswählbar
+- Gesamtlautstärke einstellen und Tastensounds pausieren
+- Einstellungen und importierte Sounds lokal speichern
+- Im Tray weiterlaufen lassen; über das Tray-Menü öffnen oder beenden
 
----
+Unterstützte Sounddateien: MP3, WAV und OGG. Tastenbelegungen speichern nur Tastencodes. Der Inhalt getippter Texte wird weder gespeichert noch übertragen.
 
-## 🚀 Installation & Setup
+## Starten
 
-### 1. Voraussetzungen
-- [.NET 8 SDK](https://dotnet.microsoft.com/download)
-- **Linux Nutzer**: Ein X11-basiertes Desktop-Environment (z.B. "Ubuntu on Xorg" beim Login auswählen).
+Voraussetzung: .NET 8 SDK.
 
-### 2. Audio-Engine (WICHTIG!)
-Die App nutzt **ManagedBass**. Du musst die nativen Treiber einmalig herunterladen und in den Projektordner legen:
-1. Gehe zu **[un4seen.com](http://www.un4seen.com/bass.html)**.
-2. Lade das Windows-Paket und/oder Linux-Paket herunter.
-3. Kopiere die **x64 Version** der Library in diesen Ordner (`lizard_crossplatform`):
-   - **Windows**: `bass.dll`
-   - **Linux**: `libbass.so`
-
-### 3. Sound-Datei hinzufügen
-- Erstelle einen Ordner `assets` im Projektverzeichnis.
-- Speichere deinen Sound als **`sound.mp3`** darin ab.
-- **Empfehlung**: [Lizzard Effect auf MyInstants](https://www.myinstants.com/de/instant/lizzard-1-94606/)
-
-### 4. Starten
 ```bash
-cd lizard_crossplatform
 dotnet run
 ```
 
----
+Die native BASS-Bibliothek muss neben der App liegen: `bass.dll` unter Windows oder `libbass.so` unter Linux. Die Bibliothek ist nicht im Repository enthalten. Ohne sie öffnet sich die Oberfläche weiterhin, aber Audio kann nicht abgespielt werden.
 
-## 📦 Building (Kompilieren)
+## Plattformhinweise
 
-### Für Windows (Single Executable)
+- Windows: globaler Tastatur-Hook über SharpHook.
+- Linux: globale Tastenerkennung benötigt je nach Desktop X11. Wayland-Umgebungen können diesen systemweiten Zugriff blockieren.
+
+## Veröffentlichen
+
 ```bash
 dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true
-```
-
-### Für Linux (Ubuntu)
-```bash
 dotnet publish -c Release -r linux-x64 --self-contained true -p:PublishSingleFile=true
 ```
-Die native `bass.dll` / `libbass.so` muss sich im selben Ordner wie die fertige `.exe` befinden.
 
----
+Beim Veröffentlichen eines GitHub Releases baut der Workflow automatisch Pakete für Windows x64 und Linux x64 und hängt sie an das Release an. Er lädt dafür die jeweilige native BASS-Bibliothek direkt aus dem offiziellen Un4seen-Paket herunter; sie wird nicht im Git-Repository gespeichert.
 
-## 🛠️ Troubleshooting
-
-### 🔇 Startet nicht / Audio-Fehler?
-Stelle sicher, dass die `bass.dll` (Windows) oder `libbass.so` (Linux) im Projektordner liegt. Ohne diese Dateien kann die App den Audio-Mixer nicht initialisieren.
-
-### ⌨️ Tasten werden nicht erkannt (Linux)?
-Melde dich beim Ubuntu-Login ab. Klicke auf das Zahnrad unten rechts und wähle **"Ubuntu on Xorg"** aus. Unter Wayland sind globale Hooks standardmäßig gesperrt.
-
----
-*Viel Spaß beim "lizard" tippen! 🦎🎶*
+BASS ist laut Anbieter für nicht kommerzielle Nutzung kostenlos. Wenn du mit der App Geld verdienst (zum Beispiel durch Verkäufe oder Werbung) oder sie kommerziell nutzt, ist eine passende, plattformbezogene Lizenz erforderlich. BASS darf nicht separat weiterverkauft oder unterlizenziert werden. Details stehen auf der [offiziellen BASS-Lizenzseite](https://www.un4seen.com/bass.html#licensing).

@@ -1,9 +1,177 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="LizardCrossPlatform.MainWindow"
-        Title="LizardCrossPlatform">
-    Welcome to Avalonia!
+        Title="Lizard Keyboard Sounds"
+        Width="1040" Height="820"
+        MinWidth="820" MinHeight="640"
+        WindowStartupLocation="CenterScreen"
+        Background="#10120F"
+        Foreground="#F1F3EB">
+    <Grid RowDefinitions="Auto,*">
+        <Border Grid.Row="0" Background="#171A15" BorderBrush="#2B3027" BorderThickness="0,0,0,1" Padding="30,18">
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Orientation="Horizontal" Spacing="14" VerticalAlignment="Center">
+                    <Border Width="44" Height="44" CornerRadius="14" Background="#C9F36B" VerticalAlignment="Center">
+                        <TextBlock Text="L" Foreground="#171B12" FontSize="25" FontWeight="Black" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <StackPanel Spacing="2" VerticalAlignment="Center">
+                        <TextBlock Name="BrandText" Text="LIZARD / KEYBOARD AUDIO" Foreground="#B8C09F" FontSize="11" FontWeight="Bold" />
+                        <TextBlock Name="StudioText" Text="Sound Studio" FontSize="18" FontWeight="SemiBold" />
+                    </StackPanel>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="16" VerticalAlignment="Center">
+                    <ComboBox Name="LanguageSelector" Width="112" SelectedIndex="0" VerticalAlignment="Center">
+                        <ComboBoxItem Content="Deutsch" Tag="de" />
+                        <ComboBoxItem Content="English" Tag="en" />
+                    </ComboBox>
+                    <Border Background="#20251D" CornerRadius="18" Padding="12,8" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                            <Ellipse Width="8" Height="8" Fill="#C9F36B" VerticalAlignment="Center" />
+                            <TextBlock Name="HookStatusText" Text="Tastatur-Hook aktiv" FontSize="12" Foreground="#DDE3D0" />
+                        </StackPanel>
+                    </Border>
+                    <Button Name="PauseButton" Content="Pausieren" Padding="15,9" Background="#292E26" Foreground="#F1F3EB" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel MaxWidth="960" HorizontalAlignment="Center" Margin="34,30,34,38" Spacing="23">
+                <Grid ColumnDefinitions="*,Auto">
+                    <StackPanel Spacing="11" VerticalAlignment="Center">
+                        <TextBlock Name="HeroEyebrow" Text="PERSONALISIERE DEIN KEYBOARD" Foreground="#C9F36B" FontSize="11" FontWeight="Bold" />
+                        <TextBlock Name="HeroTitle" Text="Jede Taste.&#10;Ein eigener Sound." FontSize="38" FontWeight="Bold" LineHeight="43" />
+                        <TextBlock Name="HeroSubtitle" Text="Wähle eine Taste, gib ihr einen Klang und hör direkt rein." Foreground="#A5AB9B" FontSize="15" TextWrapping="Wrap" MaxWidth="520" />
+                    </StackPanel>
+                    <Border Grid.Column="1" Width="184" Height="142" Margin="25,0,0,0" CornerRadius="22" Background="#1B2018" BorderBrush="#30372B" BorderThickness="1" Padding="20">
+                        <StackPanel VerticalAlignment="Center" Spacing="15">
+                            <TextBlock Name="LiveMixTitle" Text="LIVE MIX" Foreground="#A5AB9B" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" />
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="6" Height="56" VerticalAlignment="Center">
+                                <Border Width="7" Height="20" CornerRadius="4" Background="#C9F36B" VerticalAlignment="Center" />
+                                <Border Width="7" Height="38" CornerRadius="4" Background="#C9F36B" VerticalAlignment="Center" />
+                                <Border Width="7" Height="27" CornerRadius="4" Background="#E9F5C8" VerticalAlignment="Center" />
+                                <Border Width="7" Height="48" CornerRadius="4" Background="#C9F36B" VerticalAlignment="Center" />
+                                <Border Width="7" Height="31" CornerRadius="4" Background="#E9F5C8" VerticalAlignment="Center" />
+                                <Border Width="7" Height="17" CornerRadius="4" Background="#C9F36B" VerticalAlignment="Center" />
+                                <Border Width="7" Height="37" CornerRadius="4" Background="#C9F36B" VerticalAlignment="Center" />
+                            </StackPanel>
+                            <TextBlock Name="LiveMixCaption" Text="DEIN SOUND, DEIN FLOW" Foreground="#C9F36B" FontSize="9" FontWeight="Bold" HorizontalAlignment="Center" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <Grid ColumnDefinitions="1.25*,*">
+                    <Border Background="#1A1D18" BorderBrush="#2D3229" BorderThickness="1" CornerRadius="18" Padding="22">
+                        <StackPanel Spacing="14">
+                            <StackPanel Orientation="Horizontal" Spacing="9">
+                                <Border Background="#2A3321" CornerRadius="7" Padding="7,4"><TextBlock Text="01" Foreground="#C9F36B" FontSize="10" FontWeight="Bold" /></Border>
+                                <TextBlock Name="DefaultSectionTitle" Text="STANDARDSOUND" Foreground="#D8DDCF" FontSize="11" FontWeight="Bold" VerticalAlignment="Center" />
+                            </StackPanel>
+                            <TextBlock Name="DefaultDescription" Text="Für alle Tasten ohne eigene Zuordnung." Foreground="#A5AB9B" FontSize="13" TextWrapping="Wrap" />
+                            <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
+                                <StackPanel Spacing="4" VerticalAlignment="Center">
+                                    <TextBlock Name="DefaultSoundName" Text="Noch kein Sound ausgewählt" FontSize="14" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Name="DefaultSoundState" Text="MP3, WAV oder OGG" FontSize="11" Foreground="#92998A" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                                    <Button Name="DefaultPreviewButton" Content="▶" Width="38" Height="38" Background="#292E26" Foreground="#F1F3EB" />
+                                    <Button Name="ChooseDefaultButton" Content="Sound wählen" Padding="13,9" Background="#C9F36B" Foreground="#171B12" FontWeight="Bold" />
+                                </StackPanel>
+                            </Grid>
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Name="PresetLabel" Text="PRESETS" Foreground="#92998A" FontSize="10" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,4,0" />
+                                <Button Name="ThockDefaultButton" Content="Thock" Padding="12,7" Background="#292E26" Foreground="#E6E9DE" />
+                                <Button Name="CreamyDefaultButton" Content="Creamy" Padding="12,7" Background="#292E26" Foreground="#E6E9DE" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Column="1" Margin="16,0,0,0" Background="#1A1D18" BorderBrush="#2D3229" BorderThickness="1" CornerRadius="18" Padding="22">
+                        <StackPanel Spacing="12">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <TextBlock Name="VolumeSectionTitle" Text="GESAMTLAUTSTÄRKE" Foreground="#D8DDCF" FontSize="11" FontWeight="Bold" VerticalAlignment="Center" />
+                                <TextBlock Name="VolumeValue" Grid.Column="1" Text="70%" Foreground="#C9F36B" FontSize="14" FontWeight="Bold" />
+                            </Grid>
+                            <Slider Name="VolumeSlider" Minimum="0" Maximum="100" Value="70" />
+                            <TextBlock Name="VolumeDescription" Text="Ändert die Lautstärke aller Tastensounds." Foreground="#A5AB9B" FontSize="12" TextWrapping="Wrap" />
+                            <CheckBox Name="OnlyPlayOnceWhileHeldCheckBox" Content="Beim Gedrückthalten nur einmal abspielen" IsChecked="True" Foreground="#E6E9DE" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <Border Background="#1A1D18" BorderBrush="#2D3229" BorderThickness="1" CornerRadius="18" Padding="22">
+                    <StackPanel Spacing="16">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <StackPanel Spacing="4">
+                                <StackPanel Orientation="Horizontal" Spacing="9">
+                                    <Border Background="#2A3321" CornerRadius="7" Padding="7,4"><TextBlock Text="02" Foreground="#C9F36B" FontSize="10" FontWeight="Bold" /></Border>
+                                    <TextBlock Name="AssignmentsSectionTitle" Text="TASTENBELEGUNG" Foreground="#D8DDCF" FontSize="11" FontWeight="Bold" VerticalAlignment="Center" />
+                                </StackPanel>
+                                <TextBlock Name="AssignmentsSectionSubtitle" Text="Klicke eine Taste an, um ihren Sound festzulegen." Foreground="#A5AB9B" FontSize="13" Margin="34,0,0,0" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="9" VerticalAlignment="Center">
+                                <TextBlock Name="LayoutLabel" Text="LAYOUT" Foreground="#92998A" FontSize="10" FontWeight="Bold" VerticalAlignment="Center" />
+                                <ComboBox Name="KeyboardLayoutSelector" Width="150" SelectedIndex="0">
+                                    <ComboBoxItem Content="Deutsch · QWERTZ" Tag="de-DE" />
+                                    <ComboBoxItem Content="English · QWERTY" Tag="en-US" />
+                                </ComboBox>
+                            </StackPanel>
+                        </Grid>
+                        <Border Background="#151813" BorderBrush="#30372B" BorderThickness="1" CornerRadius="13" Padding="14">
+                            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                                <StackPanel Name="KeyboardPanel" Orientation="Horizontal" Spacing="14" />
+                            </ScrollViewer>
+                        </Border>
+                        <Border Background="#20251D" CornerRadius="12" Padding="14">
+                            <StackPanel Spacing="10">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <StackPanel Spacing="4" VerticalAlignment="Center">
+                                        <TextBlock Name="SelectedKeyTitle" Text="Keine Taste ausgewählt" Foreground="#C9F36B" FontSize="11" FontWeight="Bold" />
+                                        <TextBlock Name="SelectedKeySound" Text="Klicke oben eine Taste an." FontSize="13" FontWeight="SemiBold" />
+                                        <TextBlock Name="SelectedKeyStatus" Text="" Foreground="#A5AB9B" FontSize="11" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                        <Button Name="SelectedPreviewButton" Content="▶" Width="38" Height="38" Background="#292E26" Foreground="#F1F3EB" />
+                                        <Button Name="SelectedRemoveButton" Content="Entfernen" Padding="12,9" Background="#382421" Foreground="#F0B7A8" />
+                                        <Button Name="SelectedChooseButton" Content="Sound wählen" Padding="13,9" Background="#C9F36B" Foreground="#171B12" FontWeight="Bold" />
+                                    </StackPanel>
+                                </Grid>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Name="KeyPresetLabel" Text="PRESETS FÜR DIESE TASTE" Foreground="#92998A" FontSize="10" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,4,0" />
+                                    <Button Name="ThockKeyButton" Content="Thock" Padding="12,7" Background="#292E26" Foreground="#E6E9DE" />
+                                    <Button Name="CreamyKeyButton" Content="Creamy" Padding="12,7" Background="#292E26" Foreground="#E6E9DE" />
+                                </StackPanel>
+                                <CheckBox Name="SelectedMuteCheckBox" Content="Sound für diese Taste stummschalten" IsEnabled="False" Foreground="#F0B7A8" />
+                            </StackPanel>
+                        </Border>
+                        <TextBlock Name="CaptureHint" IsVisible="False" Text="Drücke jetzt die gewünschte Taste · Esc bricht ab" Foreground="#C9F36B" FontSize="12" />
+                        <StackPanel Orientation="Horizontal" Spacing="9">
+                            <TextBlock Name="MappedSoundsLabel" Text="BELEGTE TASTEN" Foreground="#92998A" FontSize="10" FontWeight="Bold" VerticalAlignment="Center" />
+                            <Button Name="ImportPackButton" Content="Soundpack importieren" Padding="12,7" Background="#292E26" Foreground="#E6E9DE" />
+                            <Button Name="CaptureButton" Content="Taste aufnehmen" Padding="12,7" Background="#292E26" Foreground="#E6E9DE" />
+                        </StackPanel>
+                        <StackPanel Name="BindingsPanel" Spacing="8" />
+                        <Border Name="EmptyState" Background="#151813" BorderBrush="#30372B" BorderThickness="1" CornerRadius="12" Padding="18">
+                            <StackPanel Spacing="5">
+                                <TextBlock Name="EmptyTitle" Text="Noch keine individuellen Tasten" FontSize="14" FontWeight="SemiBold" />
+                                <TextBlock Name="EmptyDescription" Text="Klicke oben eine Taste an oder nimm eine Taste auf. Alle übrigen verwenden den Standardsound." Foreground="#A5AB9B" FontSize="12" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
+                        <Border Name="MutedKeysSection" IsVisible="False" Background="#241B19" BorderBrush="#51332D" BorderThickness="1" CornerRadius="12" Padding="14">
+                            <StackPanel Spacing="9">
+                                <TextBlock Name="MutedKeysTitle" Text="STUMMGESCHALTETE TASTEN" Foreground="#F0B7A8" FontSize="10" FontWeight="Bold" />
+                                <WrapPanel Name="MutedKeysPanel" Orientation="Horizontal" />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <Grid ColumnDefinitions="Auto,*" Margin="2,0,0,0">
+                    <TextBlock Text="ⓘ" Foreground="#C9F36B" FontSize="15" />
+                    <TextBlock Name="PrivacyText" Grid.Column="1" Margin="10,0,0,0" Text="Tasten werden lokal erkannt; geschriebener Text wird nicht gespeichert. Die App lässt sich über das Tray-Menü schließen." Foreground="#92998A" FontSize="11" TextWrapping="Wrap" VerticalAlignment="Center" />
+                </Grid>
+                <TextBlock Name="FeedbackText" Text="" Foreground="#A5AB9B" FontSize="12" TextWrapping="Wrap" />
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
 </Window>

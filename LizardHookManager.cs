@@ -1,35 +1,74 @@
 using System;
+using System.Threading;
 using SharpHook;
 using SharpHook.Native;
 
-namespace LizardCrossPlatform
+namespace LizardCrossPlatform;
+
+public sealed class LizardHookManager : IDisposable
 {
-    public class LizardHookManager : IDisposable
+    private readonly TaskPoolGlobalHook _hook;
+    private int _captureNextKey;
+    private bool _disposed;
+
+    public event Action<KeyCode>? KeyPressed;
+    public event Action<KeyCode>? KeyReleased;
+    public event Action<KeyCode>? KeyCaptured;
+    public event Action? CaptureCancelled;
+
+    public LizardHookManager()
     {
-        private TaskPoolGlobalHook _hook;
-        public event Action? KeyPressed;
+        _hook = new TaskPoolGlobalHook();
+        _hook.KeyPressed += OnKeyPressed;
+        _hook.KeyReleased += OnKeyReleased;
+    }
 
-        public LizardHookManager()
+    private void OnKeyPressed(object? sender, KeyboardHookEventArgs e)
+    {
+        var keyCode = e.Data.KeyCode;
+        if (Interlocked.Exchange(ref _captureNextKey, 0) == 1)
         {
-            _hook = new TaskPoolGlobalHook();
-            _hook.KeyPressed += OnKeyPressed;
+            if (keyCode == KeyCode.VcEscape)
+            {
+                CaptureCancelled?.Invoke();
+            }
+            else if (keyCode != KeyCode.VcUndefined)
+            {
+                KeyCaptured?.Invoke(keyCode);
+            }
+
+            return;
         }
 
-        private void OnKeyPressed(object? sender, KeyboardHookEventArgs e)
+        if (keyCode != KeyCode.VcUndefined)
         {
-            // Trigger the sound event
-            KeyPressed?.Invoke();
+            KeyPressed?.Invoke(keyCode);
+        }
+    }
+
+    private void OnKeyReleased(object? sender, KeyboardHookEventArgs e)
+    {
+        var keyCode = e.Data.KeyCode;
+        if (keyCode != KeyCode.VcUndefined)
+        {
+            KeyReleased?.Invoke(keyCode);
+        }
+    }
+
+    public void Start() => _hook.RunAsync();
+
+    public void CaptureNextKey() => Interlocked.Exchange(ref _captureNextKey, 1);
+
+    public void CancelCapture() => Interlocked.Exchange(ref _captureNextKey, 0);
+
+    public void Dispose()
+    {
+        if (_disposed)
+        {
+            return;
         }
 
-        public void Start()
-        {
-            // Run the hook on a background thread
-            _hook.RunAsync();
-        }
-
-        public void Dispose()
-        {
-            _hook.Dispose();
-        }
+        _disposed = true;
+        _hook.Dispose();
     }
 }

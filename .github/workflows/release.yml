@@ -1,0 +1,74 @@
+name: Build and publish releases
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    name: Build Windows x64
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Publish app
+        run: dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish
+      - name: Download and include BASS
+        shell: pwsh
+        run: |
+          Invoke-WebRequest https://www.un4seen.com/files/bass24.zip -OutFile bass.zip
+          Expand-Archive bass.zip -DestinationPath bass-package
+          $bass = Get-ChildItem bass-package -Recurse -Filter bass.dll | Where-Object { $_.FullName -match '[\\/]x64[\\/]bass\.dll$' } | Select-Object -First 1
+          if (-not $bass) { throw 'The x64 bass.dll was not found in the official package.' }
+          Copy-Item $bass.FullName publish/bass.dll
+      - name: Package Windows release
+        shell: pwsh
+        run: Compress-Archive -Path publish/* -DestinationPath LizardKeyboardSounds-windows-x64.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-x64
+          path: LizardKeyboardSounds-windows-x64.zip
+          if-no-files-found: error
+
+  linux:
+    name: Build Linux x64
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Publish app
+        run: dotnet publish -c Release -r linux-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish
+      - name: Download and include BASS
+        run: |
+          curl --fail --location --silent --show-error https://www.un4seen.com/files/bass24-linux.zip --output bass.zip
+          unzip -q bass.zip -d bass-package
+          install -m 755 bass-package/libs/x86_64/libbass.so publish/libbass.so
+      - name: Package Linux release
+        run: cd publish && zip -qr ../LizardKeyboardSounds-linux-x64.zip .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-x64
+          path: LizardKeyboardSounds-linux-x64.zip
+          if-no-files-found: error
+
+  attach:
+    name: Attach packages to GitHub release
+    needs: [windows, linux]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: release-assets/*.zip
