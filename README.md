@@ -29,10 +29,14 @@ dotnet run
 
 Die native BASS-Bibliothek muss neben der App liegen: `bass.dll` unter Windows oder `libbass.so` unter Linux. Die Bibliothek ist nicht im Repository enthalten. Ohne sie öffnet sich die Oberfläche weiterhin, aber Audio kann nicht abgespielt werden.
 
+Für Windows werden bei Tag-Releases ein schneller Velopack-Installer (`*-Setup.exe`) und ein gebrandeter, interaktiver Windows-Installer (`*.msi`) veröffentlicht. Der MSI-Assistent zeigt die neue Keycap-Gecko-Grafik, Willkommens-, Lizenz-, Informations- und Abschlussseiten und lässt die Installationsart wählen. Die Installation nur für dein Benutzerkonto benötigt keine Administratorrechte; eine Installation für alle Benutzer benötigt sie. Im Bereich „Updates“ kann zwischen stabilen Releases und Alpha-Vorabversionen gewählt werden; außerdem lässt sich die Update-Prüfung bei der Windows-Anmeldung ein- oder ausschalten. Die Konfiguration liegt in `%APPDATA%\LizardKeyboardSounds\settings.json`. Bei einem gefundenen Update öffnet sich die App und fragt vor Download und Neustart nach. Einstellungen und importierte Sounds bleiben erhalten.
+
+Für die eigenen Bestandteile gilt die [Lizenz mit privater, nicht kommerzieller Nutzung](LICENSE.md); der Installer zeigt sie vor der Installation zur Zustimmung an. Drittanbieter-Komponenten wie BASS bleiben ihren jeweiligen Lizenzen unterworfen.
+
 ## Plattformhinweise
 
 - Windows: globaler Tastatur-Hook über SharpHook.
-- Linux: SharpHook unterstützt X11 und mit Version 8 auch Wayland. Das Wayland-Backend ist noch experimentell, hat Einschränkungen und kann erhöhte Rechte erfordern. Die Alpha-Releases dienen zum Testen dieses Backends.
+- Linux: SharpHook unterstützt X11 und mit Version 8 auch Wayland. Das Wayland-Backend ist noch experimentell, hat Einschränkungen und kann erhöhte Rechte erfordern. Die App zeigt einen verständlichen Status mit Fehlerdetails, wenn der globale Tastatur-Hook nicht startet. Das Fedora-RPM erleichtert Installation und Start über das Anwendungsmenü; es ändert keine Wayland-Berechtigungen. Die Alpha-Releases dienen zum Testen dieses Backends.
 
 ## Veröffentlichen
 
@@ -41,7 +45,7 @@ dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=
 dotnet publish -c Release -r linux-x64 --self-contained true -p:PublishSingleFile=true
 ```
 
-Wenn du einen stabilen Versions-Tag im Format `vJJJJ.MM.TT` pushst, baut der Workflow automatisch Pakete für Windows x64 und Linux x64, erstellt ein GitHub Release mit generierten Release-Notes und hängt beide ZIP-Dateien an. Er lädt dafür die jeweilige native BASS-Bibliothek direkt aus dem offiziellen Un4seen-Paket herunter; sie wird nicht im Git-Repository gespeichert.
+Wenn du einen stabilen Versions-Tag im Format `vJJJJ.MM.TT` pushst, baut der Workflow automatisch Pakete für Windows x64 und Linux x64, erstellt ein GitHub Release mit generierten Release-Notes und hängt die Windows- und Linux-ZIP sowie ein Fedora-RPM an. Er lädt dafür die jeweilige native BASS-Bibliothek direkt aus dem offiziellen Un4seen-Paket herunter; sie wird nicht im Git-Repository gespeichert.
 
 ```bash
 git tag v2026.11.22

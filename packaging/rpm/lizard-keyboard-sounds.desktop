@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Lizard Keyboard Sounds
+Comment=Assign sounds to keyboard keys
+Exec=/usr/lib/lizard-keyboard-sounds/LizardCrossPlatform
+Icon=lizard-keyboard-sounds
+Terminal=false
+Type=Application
+Categories=Utility;Audio;

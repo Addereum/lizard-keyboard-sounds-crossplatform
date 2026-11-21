@@ -1,5 +1,6 @@
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 using SharpHook;
 using SharpHook.Data;
 
@@ -15,6 +16,7 @@ public sealed class LizardHookManager : IDisposable
     public event Action<KeyCode>? KeyReleased;
     public event Action<KeyCode>? KeyCaptured;
     public event Action? CaptureCancelled;
+    public event Action<Exception>? HookFailed;
 
     public LizardHookManager()
     {
@@ -55,7 +57,23 @@ public sealed class LizardHookManager : IDisposable
         }
     }
 
-    public void Start() => _hook.RunAsync();
+    public void Start()
+    {
+        try
+        {
+            _ = _hook.RunAsync().ContinueWith(task =>
+            {
+                if (task.IsFaulted && task.Exception is not null)
+                {
+                    HookFailed?.Invoke(task.Exception.GetBaseException());
+                }
+            }, TaskScheduler.Default);
+        }
+        catch (Exception ex)
+        {
+            HookFailed?.Invoke(ex);
+        }
+    }
 
     public void CaptureNextKey() => Interlocked.Exchange(ref _captureNextKey, 1);
 

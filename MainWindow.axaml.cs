@@ -21,9 +21,11 @@ public partial class MainWindow : Window
     private readonly HashSet<string> _selectedKeys = new(StringComparer.Ordinal);
     private bool _controlHeld;
     private bool _needsInitialSettingsSave;
+    private Exception? _hookError;
 
     public event Action<AppSettings>? SettingsChanged;
     public event Action? CaptureRequested;
+    public event Func<bool, Task>? UpdateCheckRequested;
 
     public bool AllowClose { get; set; }
 
@@ -92,6 +94,7 @@ public partial class MainWindow : Window
         CaptureButton.Click += (_, _) => BeginCapture();
         ImportPackButton.Click += async (_, _) => await ImportSoundPackAsync();
         PauseButton.Click += (_, _) => ToggleEnabled();
+        CheckUpdatesButton.Click += async (_, _) => await ShowUpdateSettingsAsync();
         SelectedChooseButton.Click += async (_, _) => await ChooseSoundForSelectedKeyAsync();
         ThockKeyButton.Click += (_, _) => SetSelectedKeyPreset("Thock");
         CreamyKeyButton.Click += (_, _) => SetSelectedKeyPreset("Creamy");
@@ -176,6 +179,7 @@ public partial class MainWindow : Window
         EmptyTitle.Text = T("emptyTitle");
         EmptyDescription.Text = T("emptyDescription");
         PrivacyText.Text = T("privacy");
+        CheckUpdatesButton.Content = T("updateSettings");
     }
 
     private void BeginCapture()
@@ -492,7 +496,9 @@ public partial class MainWindow : Window
         DefaultPreviewButton.IsEnabled = !string.IsNullOrWhiteSpace(defaultPath) && File.Exists(defaultPath);
 
         PauseButton.Content = T(_settings.IsEnabled ? "pause" : "resume");
-        HookStatusText.Text = T(_settings.IsEnabled ? "hookActive" : "paused");
+        HookStatusText.Text = T(_hookError is not null ? "hookUnavailable" : _settings.IsEnabled ? "hookActive" : "paused");
+        HookStatusIndicator.Fill = Brush.Parse(_hookError is not null ? "#E8B77A" : "#C9F36B");
+        ToolTip.SetTip(HookStatusText, _hookError is null ? null : $"{T("hookUnavailableHint")}\n{_hookError.Message}");
         VolumeValue.Text = $"{(int)VolumeSlider.Value}%";
 
         RefreshKeyboard();
@@ -535,6 +541,128 @@ public partial class MainWindow : Window
         NotifySettingsChanged();
         RefreshView();
         SetFeedback(string.Format(T("keyUnmutedFeedback"), FormatKey(key)));
+    }
+
+    public void ShowHookError(Exception error)
+    {
+        _hookError = error;
+        HookStatusText.Text = T("hookUnavailable");
+        HookStatusIndicator.Fill = Brush.Parse("#E8B77A");
+        ToolTip.SetTip(HookStatusText, $"{T("hookUnavailableHint")}\n{error.Message}");
+    }
+
+    public void SetUpdaterAvailable() => CheckUpdatesButton.IsVisible = true;
+
+    public void ShowUpdateMessage(string message, bool isWarning = false) => SetFeedback(message, isWarning);
+
+    private async Task ShowUpdateSettingsAsync()
+    {
+        var channelSelector = new ComboBox { Width = 270 };
+        channelSelector.Items.Add(T("updateStable"));
+        channelSelector.Items.Add(T("updatePrerelease"));
+        channelSelector.SelectedIndex = _settings.UpdateChannel == "prerelease" ? 1 : 0;
+        var startupCheckBox = new CheckBox
+        {
+            Content = T("updateAtStartup"),
+            IsChecked = _settings.CheckUpdatesAtStartup,
+            Foreground = Brush.Parse("#DDE3D0")
+        };
+
+        var dialog = new Window
+        {
+            Title = T("updateSettings"),
+            Width = 480,
+            Height = 300,
+            CanResize = false,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            Background = Brush.Parse("#171A15"),
+            Foreground = Brush.Parse("#F1F3EB")
+        };
+        var content = new StackPanel { Margin = new Thickness(24), Spacing = 16 };
+        content.Children.Add(new TextBlock { Text = T("updateChannelLabel"), Foreground = Brush.Parse("#A5AB9B") });
+        content.Children.Add(channelSelector);
+        content.Children.Add(startupCheckBox);
+
+        var buttons = new StackPanel
+        {
+            Orientation = Avalonia.Layout.Orientation.Horizontal,
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
+            Spacing = 10,
+            Margin = new Thickness(0, 12, 0, 0)
+        };
+        var cancelButton = new Button { Content = T("updateLater"), Padding = new Thickness(13, 8) };
+        var saveButton = new Button { Content = T("save"), Padding = new Thickness(13, 8) };
+        var checkButton = new Button
+        {
+            Content = T("checkUpdates"),
+            Padding = new Thickness(13, 8),
+            Background = Brush.Parse("#C9F36B"),
+            Foreground = Brush.Parse("#171B12")
+        };
+        cancelButton.Click += (_, _) => dialog.Close(0);
+        saveButton.Click += (_, _) => dialog.Close(1);
+        checkButton.Click += (_, _) => dialog.Close(2);
+        buttons.Children.Add(cancelButton);
+        buttons.Children.Add(saveButton);
+        buttons.Children.Add(checkButton);
+        content.Children.Add(buttons);
+        dialog.Content = content;
+
+        var result = await dialog.ShowDialog<int>(this);
+        if (result == 0)
+        {
+            return;
+        }
+
+        _settings.UpdateChannel = channelSelector.SelectedIndex == 1 ? "prerelease" : "stable";
+        _settings.CheckUpdatesAtStartup = startupCheckBox.IsChecked == true;
+        NotifySettingsChanged();
+        if (result == 2 && UpdateCheckRequested is not null)
+        {
+            await UpdateCheckRequested(true);
+        }
+    }
+
+    public async Task<bool> ConfirmUpdateAsync(string version)
+    {
+        var dialog = new Window
+        {
+            Title = T("updateTitle"),
+            Width = 430,
+            Height = 220,
+            CanResize = false,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            Background = Brush.Parse("#171A15"),
+            Foreground = Brush.Parse("#F1F3EB")
+        };
+        var content = new StackPanel { Margin = new Thickness(24), Spacing = 18 };
+        content.Children.Add(new TextBlock
+        {
+            Text = string.Format(T("updateAvailable"), version),
+            FontSize = 16,
+            TextWrapping = TextWrapping.Wrap
+        });
+        var buttons = new StackPanel
+        {
+            Orientation = Avalonia.Layout.Orientation.Horizontal,
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
+            Spacing = 10
+        };
+        var laterButton = new Button { Content = T("updateLater"), Padding = new Thickness(14, 8) };
+        var installButton = new Button
+        {
+            Content = T("updateInstall"),
+            Padding = new Thickness(14, 8),
+            Background = Brush.Parse("#C9F36B"),
+            Foreground = Brush.Parse("#171B12")
+        };
+        laterButton.Click += (_, _) => dialog.Close(false);
+        installButton.Click += (_, _) => dialog.Close(true);
+        buttons.Children.Add(laterButton);
+        buttons.Children.Add(installButton);
+        content.Children.Add(buttons);
+        dialog.Content = content;
+        return await dialog.ShowDialog<bool>(this);
     }
 
     private void RefreshKeyboard()

@@ -11,6 +11,12 @@ public sealed class AppSettings
     public bool OnlyPlayOnceWhileHeld { get; set; } = true;
     public string AppLanguage { get; set; } = "de";
     public string KeyboardLayout { get; set; } = "de-DE";
+#if ALPHA_UPDATE_CHANNEL
+    public string UpdateChannel { get; set; } = "prerelease";
+#else
+    public string UpdateChannel { get; set; } = "stable";
+#endif
+    public bool CheckUpdatesAtStartup { get; set; } = true;
     public Dictionary<string, string> KeySounds { get; set; } = new();
     public HashSet<string> MutedKeys { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 
@@ -24,6 +30,8 @@ public sealed class AppSettings
             OnlyPlayOnceWhileHeld = OnlyPlayOnceWhileHeld,
             AppLanguage = AppLanguage,
             KeyboardLayout = KeyboardLayout,
+            UpdateChannel = UpdateChannel,
+            CheckUpdatesAtStartup = CheckUpdatesAtStartup,
             KeySounds = new Dictionary<string, string>(KeySounds ?? new Dictionary<string, string>()),
             MutedKeys = new HashSet<string>(MutedKeys ?? new HashSet<string>(), StringComparer.OrdinalIgnoreCase)
         };

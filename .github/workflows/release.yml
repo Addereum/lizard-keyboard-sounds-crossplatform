@@ -18,7 +18,17 @@ jobs:
         with:
           dotnet-version: 8.0.x
       - name: Publish app
-        run: dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish
+        shell: pwsh
+        run: |
+          $version = $env:GITHUB_REF_NAME.Substring(1)
+          $channel = 'win'
+          $publishArgs = @()
+          if ($version.Contains('-alpha.')) {
+            $channel = 'win-alpha'
+            $publishArgs += '-p:UpdateChannel=win-alpha'
+          }
+          dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish @publishArgs
+          Copy-Item LICENSE.md publish/LICENSE.md
       - name: Download and include BASS
         shell: pwsh
         run: |
@@ -30,10 +40,44 @@ jobs:
       - name: Package Windows release
         shell: pwsh
         run: Compress-Archive -Path publish/* -DestinationPath LizardKeyboardSounds-windows-x64.zip
+      - name: Build Windows installer and updater packages
+        shell: pwsh
+        run: |
+          $version = $env:GITHUB_REF_NAME.Substring(1)
+          $channel = if ($version.Contains('-alpha.')) { 'win-alpha' } else { 'win' }
+          $dateVersion = $version.Split('-')[0].Split('.')
+          $msiBuild = [int]$dateVersion[2] * 100
+          if ($version -match '-alpha\.(\d+)$') { $msiBuild += [int]$Matches[1] }
+          $msiVersion = '{0}.{1}.{2}' -f ([int]$dateVersion[0] - 2000), [int]$dateVersion[1], $msiBuild
+          $artwork = Join-Path $env:RUNNER_TEMP 'lizard-keyboard-sounds-installer'
+          & tools/GenerateWindowsInstallerArtwork.ps1 -OutputDirectory $artwork
+          dotnet tool install vpk --tool-path .tools --version 1.2.161
+          & .tools/vpk.exe pack `
+            --packId Addereum.LizardKeyboardSounds `
+            --packVersion $version `
+            --packDir publish `
+            --mainExe LizardCrossPlatform.exe `
+            --packTitle 'Lizard Keyboard Sounds' `
+            --packAuthors 'Lukas Roß' `
+            --runtime win-x64 `
+            --channel $channel `
+            --icon icon.ico `
+            --msi `
+            --instLocation Either `
+            --msiVersion $msiVersion `
+            --msiTopBanner "$artwork\msi-top-banner.bmp" `
+            --msiDialogBackground "$artwork\msi-dialog-background.bmp" `
+            --instWelcome packaging/windows/installer-welcome.txt `
+            --instLicense LICENSE.md `
+            --instReadme packaging/windows/installer-readme.md `
+            --instConclusion packaging/windows/installer-conclusion.txt `
+            --outputDir win-release
       - uses: actions/upload-artifact@v4
         with:
           name: windows-x64
-          path: LizardKeyboardSounds-windows-x64.zip
+          path: |
+            LizardKeyboardSounds-windows-x64.zip
+            win-release/*
           if-no-files-found: error
 
   linux:
@@ -45,18 +89,37 @@ jobs:
         with:
           dotnet-version: 8.0.x
       - name: Publish app
-        run: dotnet publish -c Release -r linux-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish
+        run: |
+          dotnet publish -c Release -r linux-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish
+          cp LICENSE.md publish/LICENSE.md
       - name: Download and include BASS
         run: |
           curl --fail --location --silent --show-error https://www.un4seen.com/files/bass24-linux.zip --output bass.zip
           unzip -q bass.zip -d bass-package
           install -m 755 bass-package/libs/x86_64/libbass.so publish/libbass.so
+      - name: Build Fedora RPM
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes rpm
+          VERSION="${GITHUB_REF_NAME#v}"
+          VERSION="${VERSION//-/.}"
+          mkdir -p rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS} publish
+          cp packaging/rpm/lizard-keyboard-sounds.desktop rpmbuild/SOURCES/
+          cp icon.png rpmbuild/SOURCES/lizard-keyboard-sounds.png
+          rpmbuild -bb packaging/rpm/lizard-keyboard-sounds.spec \
+            --define "_topdir $PWD/rpmbuild" \
+            --define "version $VERSION" \
+            --define "release 1" \
+            --define "source_dir $PWD/publish"
+          cp rpmbuild/RPMS/x86_64/*.rpm LizardKeyboardSounds-fedora-x86_64.rpm
       - name: Package Linux release
         run: cd publish && zip -qr ../LizardKeyboardSounds-linux-x64.zip .
       - uses: actions/upload-artifact@v4
         with:
           name: linux-x64
-          path: LizardKeyboardSounds-linux-x64.zip
+          path: |
+            LizardKeyboardSounds-linux-x64.zip
+            LizardKeyboardSounds-fedora-x86_64.rpm
           if-no-files-found: error
 
   attach:
@@ -72,7 +135,7 @@ jobs:
           merge-multiple: true
       - uses: softprops/action-gh-release@v2
         with:
-          files: release-assets/*.zip
+          files: release-assets/*
           generate_release_notes: true
           prerelease: ${{ contains(github.ref_name, '-alpha.') }}
           make_latest: ${{ !contains(github.ref_name, '-alpha.') }}

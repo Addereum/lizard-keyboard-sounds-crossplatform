@@ -8,6 +8,9 @@ using SharpHook.Data;
 using System;
 using System.IO;
 using System.Text.Json;
+using System.Threading.Tasks;
+using Velopack;
+using Velopack.Sources;
 
 namespace LizardCrossPlatform;
 
@@ -16,6 +19,8 @@ public partial class App : Application
     private LizardHookManager? _hookManager;
     private AudioEngine? _audioEngine;
     private MainWindow? _mainWindow;
+    private UpdateManager? _updateManager;
+    private bool _updateCheckInProgress;
     private AppSettings _settings = new();
     private readonly HashSet<KeyCode> _pressedKeys = new();
     private readonly object _pressedKeysLock = new();
@@ -33,17 +38,35 @@ public partial class App : Application
             _settings = LoadSettings();
             _audioEngine = new AudioEngine();
             _hookManager = new LizardHookManager();
+            if (OperatingSystem.IsWindows())
+            {
+                _updateManager = CreateUpdateManager(_settings.UpdateChannel);
+            }
             _mainWindow = new MainWindow(_settings, _audioEngine);
 
             _mainWindow.SettingsChanged += settings =>
             {
+                var previousSettings = _settings;
                 _settings = settings;
                 SaveSettings(settings);
                 ApplyTrayLanguage(settings.AppLanguage);
+                if (_updateManager?.IsInstalled == true)
+                {
+                    if (previousSettings.UpdateChannel != settings.UpdateChannel)
+                    {
+                        _updateManager = CreateUpdateManager(settings.UpdateChannel);
+                    }
+
+                    if (previousSettings.CheckUpdatesAtStartup != settings.CheckUpdatesAtStartup)
+                    {
+                        WindowsUpdaterStartup.SetEnabled(settings.CheckUpdatesAtStartup);
+                    }
+                }
             };
             _mainWindow.CaptureRequested += () => _hookManager.CaptureNextKey();
             _hookManager.KeyPressed += OnKeyPressed;
             _hookManager.KeyReleased += OnKeyReleased;
+            _hookManager.HookFailed += ex => Dispatcher.UIThread.Post(() => _mainWindow?.ShowHookError(ex));
             _hookManager.KeyCaptured += key =>
             {
                 lock (_pressedKeysLock)
@@ -70,6 +93,14 @@ public partial class App : Application
                 }
             };
 
+            if (_updateManager?.IsInstalled == true)
+            {
+                _mainWindow.SetUpdaterAvailable();
+                _mainWindow.UpdateCheckRequested += CheckForUpdatesAsync;
+                _mainWindow.Opened += (_, _) => _ = CheckForUpdatesAsync(showNoUpdates: false);
+                WindowsUpdaterStartup.SetEnabled(_settings.CheckUpdatesAtStartup);
+            }
+
             desktop.MainWindow = _mainWindow;
             ApplyTrayLanguage(_settings.AppLanguage);
             _hookManager.Start();
@@ -77,6 +108,68 @@ public partial class App : Application
         }
 
         base.OnFrameworkInitializationCompleted();
+    }
+
+    private static UpdateManager CreateUpdateManager(string updateChannel)
+    {
+        var channel = updateChannel == "prerelease" ? "win-alpha" : "win";
+        var source = new GithubSource("https://github.com/Addereum/lizard-keyboard-sounds-crossplatform", null, prerelease: true);
+        return new UpdateManager(source, new UpdateOptions
+        {
+            ExplicitChannel = channel,
+            AllowVersionDowngrade = true
+        });
+    }
+
+    private async Task CheckForUpdatesAsync(bool showNoUpdates)
+    {
+        if (_updateCheckInProgress || _updateManager?.IsInstalled != true || _mainWindow is null)
+        {
+            return;
+        }
+
+        _updateCheckInProgress = true;
+        try
+        {
+            if (showNoUpdates)
+            {
+                _mainWindow.ShowUpdateMessage(UiText.Get(_settings.AppLanguage, "updatesChecking"));
+            }
+
+            var update = await _updateManager.CheckForUpdatesAsync();
+            if (update is null)
+            {
+                if (showNoUpdates)
+                {
+                    _mainWindow.ShowUpdateMessage(UiText.Get(_settings.AppLanguage, "upToDate"));
+                }
+
+                return;
+            }
+
+            var targetVersion = update.TargetFullRelease.Version.ToString();
+            if (!await _mainWindow.ConfirmUpdateAsync(targetVersion))
+            {
+                return;
+            }
+
+            _mainWindow.ShowUpdateMessage(UiText.Get(_settings.AppLanguage, "updateDownloading"));
+            await _updateManager.DownloadUpdatesAsync(update);
+            _updateManager.ApplyUpdatesAndRestart(update);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine(ex);
+            if (showNoUpdates)
+            {
+                _mainWindow.ShowUpdateMessage(string.Format(
+                    UiText.Get(_settings.AppLanguage, "updateFailed"), ex.Message), isWarning: true);
+            }
+        }
+        finally
+        {
+            _updateCheckInProgress = false;
+        }
     }
 
     private void OnKeyPressed(KeyCode keyCode)

@@ -20,13 +20,14 @@
                     </StackPanel>
                 </StackPanel>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="16" VerticalAlignment="Center">
+                    <Button Name="CheckUpdatesButton" Content="Updates" Padding="12,9" Background="#292E26" Foreground="#F1F3EB" IsVisible="False" />
                     <ComboBox Name="LanguageSelector" Width="112" SelectedIndex="0" VerticalAlignment="Center">
                         <ComboBoxItem Content="Deutsch" Tag="de" />
                         <ComboBoxItem Content="English" Tag="en" />
                     </ComboBox>
                     <Border Background="#20251D" CornerRadius="18" Padding="12,8" VerticalAlignment="Center">
                         <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                            <Ellipse Width="8" Height="8" Fill="#C9F36B" VerticalAlignment="Center" />
+                            <Ellipse Name="HookStatusIndicator" Width="8" Height="8" Fill="#C9F36B" VerticalAlignment="Center" />
                             <TextBlock Name="HookStatusText" Text="Tastatur-Hook aktiv" FontSize="12" Foreground="#DDE3D0" />
                         </StackPanel>
                     </Border>
