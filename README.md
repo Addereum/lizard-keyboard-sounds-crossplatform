@@ -41,6 +41,11 @@ dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=
 dotnet publish -c Release -r linux-x64 --self-contained true -p:PublishSingleFile=true
 ```
 
-Beim Veröffentlichen eines GitHub Releases baut der Workflow automatisch Pakete für Windows x64 und Linux x64 und hängt sie an das Release an. Er lädt dafür die jeweilige native BASS-Bibliothek direkt aus dem offiziellen Un4seen-Paket herunter; sie wird nicht im Git-Repository gespeichert.
+Wenn du einen Versions-Tag wie `v1.0.0` pushst, baut der Workflow automatisch Pakete für Windows x64 und Linux x64, erstellt ein GitHub Release mit generierten Release-Notes und hängt beide ZIP-Dateien an. Er lädt dafür die jeweilige native BASS-Bibliothek direkt aus dem offiziellen Un4seen-Paket herunter; sie wird nicht im Git-Repository gespeichert.
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
 
 BASS ist laut Anbieter für nicht kommerzielle Nutzung kostenlos. Wenn du mit der App Geld verdienst (zum Beispiel durch Verkäufe oder Werbung) oder sie kommerziell nutzt, ist eine passende, plattformbezogene Lizenz erforderlich. BASS darf nicht separat weiterverkauft oder unterlizenziert werden. Details stehen auf der [offiziellen BASS-Lizenzseite](https://www.un4seen.com/bass.html#licensing).
