@@ -20,5 +20,6 @@
 
   <ItemGroup>
     <AvaloniaResource Include="icon.png" />
+    <Content Include="Presets\*.wav" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

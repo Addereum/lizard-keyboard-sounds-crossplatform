@@ -5,15 +5,19 @@
     <Application.Styles>
         <FluentTheme />
     </Application.Styles>
+    <Application.Resources>
+        <x:String x:Key="TraySettingsText">Einstellungen</x:String>
+        <x:String x:Key="TrayExitText">Beenden</x:String>
+    </Application.Resources>
 
     <TrayIcon.Icons>
         <TrayIcons>
             <TrayIcon Icon="/icon.png" ToolTipText="Lizard Keyboard Sounds">
                 <TrayIcon.Menu>
                     <NativeMenu>
-                        <NativeMenuItem Header="Settings" Click="OnSettingsClick"/>
+                        <NativeMenuItem Header="{DynamicResource TraySettingsText}" Click="OnSettingsClick"/>
                         <NativeMenuItemSeparator/>
-                        <NativeMenuItem Header="Exit" Click="OnExitClick"/>
+                        <NativeMenuItem Header="{DynamicResource TrayExitText}" Click="OnExitClick"/>
                     </NativeMenu>
                 </TrayIcon.Menu>
             </TrayIcon>
