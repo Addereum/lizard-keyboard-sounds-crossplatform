@@ -21,7 +21,7 @@ Unterstützte Sounddateien: MP3, WAV und OGG. Tastenbelegungen speichern nur Tas
 
 ## Starten
 
-Voraussetzung: .NET 8 SDK.
+Voraussetzung: .NET 10 SDK.
 
 ```bash
 dotnet run

@@ -4,6 +4,11 @@ Release:        %{release}%{?dist}
 Summary:        Per-key keyboard sound desktop application
 License:        LicenseRef-Proprietary
 BuildArch:      x86_64
+
+# Prevent rpmbuild from stripping .NET single-file bundles and creating debuginfo packages
+%global debug_package %{nil}
+%global __strip /bin/true
+%define __os_install_post %{nil}
 Requires:       libX11
 Requires:       libXi
 Requires:       libXtst
