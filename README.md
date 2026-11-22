@@ -36,7 +36,19 @@ Für die eigenen Bestandteile gilt die [Lizenz mit privater, nicht kommerzieller
 ## Plattformhinweise
 
 - Windows: globaler Tastatur-Hook über SharpHook.
-- Linux: SharpHook unterstützt X11 und mit Version 8 auch Wayland. Das Wayland-Backend ist noch experimentell, hat Einschränkungen und kann erhöhte Rechte erfordern. Die App zeigt einen verständlichen Status mit Fehlerdetails, wenn der globale Tastatur-Hook nicht startet. Das Fedora-RPM erleichtert Installation und Start über das Anwendungsmenü; es ändert keine Wayland-Berechtigungen. Die Alpha-Releases dienen zum Testen dieses Backends.
+- Linux: SharpHook unterstützt X11 und mit Version 8 auch Wayland. Das Wayland-Backend ist noch experimentell und hat Einschränkungen. Die App zeigt einen verständlichen Status mit Fehlerdetails, wenn der globale Tastatur-Hook nicht startet. Die Alpha-Releases dienen zum Testen dieses Backends.
+
+### Fedora unter Wayland
+
+Das Fedora-RPM richtet beim Installieren automatisch die benötigten Rechte für `/dev/input` und `/dev/uinput` ein. Dafür verwendet es eine eigene Systemgruppe und eine udev-Regel; die App wird mit dieser Gruppe gestartet, nicht als Administrator. Die RPM-Installation benötigt `sudo` beziehungsweise eine Bestätigung durch den Paketmanager. Starte die App anschließend normal aus dem Anwendungsmenü. Du musst sie **nicht** mit `sudo` starten.
+
+```bash
+sudo dnf install ./LizardKeyboardSounds-fedora-x86_64.rpm
+```
+
+Diese Berechtigung ist nötig, damit die App globale Tastendrücke hören und Tasteneingaben an das System zurückreichen kann. Das betrifft Tastencodes; geschriebener Text wird von der App nicht gespeichert oder übertragen. Das RPM verwendet dafür eine eigene Gruppe und fügt keine zusätzliche `uaccess`-Regel hinzu, die allen Programmen deiner Sitzung Zugriff geben würde. Bei der Deinstallation entfernt das RPM die udev-Regel.
+
+Die portable Linux-ZIP und manuelle Installationen richten keine Systemrechte ein. Für X11 mit dem XRecord-Backend sind diese zusätzlichen Rechte nicht erforderlich. Unter Wayland bleibt SharpHooks Unterstützung experimentell und hängt außerdem von der Fedora- und Desktop-Konfiguration ab.
 
 ## Veröffentlichen
 

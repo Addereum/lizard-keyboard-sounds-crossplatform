@@ -1,0 +1,2 @@
+SUBSYSTEM=="input", KERNEL=="event*", GROUP="lizard-keyboard-sounds", MODE="0660"
+SUBSYSTEM=="misc", KERNEL=="uinput", GROUP="lizard-keyboard-sounds", MODE="0660"

@@ -105,6 +105,7 @@ jobs:
           VERSION="${VERSION//-/.}"
           mkdir -p rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS} publish
           cp packaging/rpm/lizard-keyboard-sounds.desktop rpmbuild/SOURCES/
+          cp packaging/rpm/lizard-keyboard-sounds.rules rpmbuild/SOURCES/
           cp icon.png rpmbuild/SOURCES/lizard-keyboard-sounds.png
           rpmbuild -bb packaging/rpm/lizard-keyboard-sounds.spec \
             --define "_topdir $PWD/rpmbuild" \
